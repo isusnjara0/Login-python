@@ -1,27 +1,64 @@
-print('Dobrodošli u Unidu sustav!')
-print('Za prijavu upišite broj 1, za registraciju broj 2: ')
+import sqlite3
+import hashlib
+from datetime import date
 
-x = 0 
-email=''
-lozinka=''
+def register_user(name, email, password, contact):
+    today = date.today()
+    con = sqlite3.connect('baza.db')
+    cur = con.cursor()
+    query = cur.execute("INSERT INTO user (name, email, password, contact, created_at) VALUES (?, ?, ?, ?, ?)", (name, email, password, contact, today))
+    con.commit()
+    con.close()
 
-xemail = 'korisnik@gmail.com'
-xlozinka = 'lozinka'
-
-while(not(x==1 or x==2)):
-    x = int(input('unesite broj: '))
-
-    if(x==1):
-        email = input('Unesite email: ')
-        lozinka = input('Unesite lozinku: ')
-
-        if(email==xemail and lozinka==xlozinka):
+def login():
+    email = input("Unesite e-mail: ")
+    pwd = input("Unesite lozinku: ")
+    pwd = hashing(pwd)
+    con = sqlite3.connect('baza.db')
+    cur = con.cursor()
+    broj_prijava = 0
+    for row in cur.execute('SELECT * FROM user'):
+        rowEmail =  row[2]
+        rowPwd = row[3]
+        if(email == rowEmail and pwd == rowPwd):
+            broj_prijava = int( row[4])
+            broj_prijava += 1
+            query = 'UPDATE user SET broj_prijava='+str(broj_prijava)+' WHERE id='+str(row[0])+';'
+            print(query)
+            cur.execute(query)
+            con.commit()
             print('Uspješna prijava!')
-        else:
-            print('Pogrešan email ili lozinka')
+            return
+    print('Krivi email ili password!')
+    return
 
-    if(x==2):
-        print('Registracija!')
+def hashing(pwd):
+    result = hashlib.sha256(pwd.encode('utf-8')).hexdigest()
+    return result
+
+print("Dobrodošli u Unidu sustav!")
+print("Za prijavu upišite broj 1, za registraciju broj 2:")
+odabir = int(input("Unesite broj: "))
+
+while odabir != 1 and odabir != 2:
+    odabir = int(input("Unesite broj: "))
+
+
+if odabir == 1:
+    print("Dobrodošli u prijavu!")
+    login()
+
+else:
+    print("Dobrodošli u registraciju!")
+    name = input("Unesite Vaše ime: ")
+    email = input("Unesite e-mail: ")
+    pwd = input("Unesite lozinku: ")
+    contact = input("Unesite kontakt broj: ")
+    register_user(name, email, hashing(pwd), contact)
+    
+
+
+
 
     
     
