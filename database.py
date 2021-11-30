@@ -12,6 +12,11 @@ cur.execute('''CREATE TABLE IF NOT EXISTS user
                contact text NOT NULL,
                created_at text)''')
 
+cur.execute('''CREATE TABLE IF NOT EXISTS forgot_password
+               (user_id integer PRIMARY KEY,
+               hash text NOT NULL,
+               valid_until text NOT NULL)''')
+
 con.commit()
 con.close()
 
